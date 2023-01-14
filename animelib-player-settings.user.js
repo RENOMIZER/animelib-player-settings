@@ -1,45 +1,66 @@
 // ==UserScript==
 // @name         AnimeLib Player Settings
-// @namespace    mailto:implaninyl1977@rambler.ru
-// @version      1.1
+// @namespace    https://github.com/RENOMIZER
+// @version      1.2
 // @description  Settings for video player
 // @author       RENOMIZER
 // @match        https://animelib.me/anime/*
-// @grant       GM_getValue
-// @grant       GM_setValue
-// @grant       GM_addStyle
-// @require https://code.jquery.com/jquery-3.6.3.js
-// @license GNU GPLv3
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_addStyle
+// @grant        GM_getResourceText
+// @grant        GM_deleteValue
+// @require      https://code.jquery.com/jquery-3.6.3.js
+// @resource     REMOTE_CSS https://raw.githubusercontent.com/RENOMIZER/animelib-player-settings/main/settings-styles.css
 // ==/UserScript==
 
 var $ = window.jQuery;
 var hght = GM_getValue("hght");
+var cinechck = GM_getValue("cinechck");
+var maxhght = 80;
 
 (function () {
     'use strict'
 
-    /* Add button */
+    /* Add style */
+    const CSS = GM_getResourceText("REMOTE_CSS");
+    GM_addStyle(CSS);
+
+    /* Add settings button */
     $('<div class="reader-header-action reader-header-action_icon player-height"> </div>').insertBefore($('#add-chapter-bookmark'));
     $('.player-height').append('<span class="reader-header__icon"> </span>');
     $('.player-height span.reader-header__icon').append('<i class="fa fa-solid fa-gear"></i>');
 
-    /* Add panel */
+    /* Add settings panel */
     $('body').append('<div id="player-settings-modal" class="modal" data-type="slide" tabindex="-1"> </div>');
     $('#episodes-list-modal .popup__content').clone().appendTo($('#player-settings-modal'));
     $('#player-settings-modal div.modal__body').remove();
     $('#player-settings-modal h4').text("Настройки плеера");
     $('#player-settings-modal div.modal__content').append('<div id="settings" class="modal__body"> </div>');
     $('#player-settings-modal div.modal__content').attr('style', 'overflow-y: auto; left: 80%; width: 20%');
+    $('#player-settings-modal div.modal__content').append('<p class="settingstext hiddentext"> Настройки сохраняются в память дополнения </p>')
 
-    /* Add content */
+    /* Add settings content */
     $('#settings').append('<div class="slidecontainer"> </div>');
-    $('.slidecontainer').append('<h1 class="slideheader"> Высота плеера </h1>');
-    $('.slidecontainer').append('<input type="range" min="60" max="80" class="slider" id="player-height_var" name="player-height_var">');
-    $('.slidecontainer').append('<h2 class="slidemin"> 0 </h2>');
-    $('.slidecontainer').append('<h3 class="slidemax"> 100 </h3>');
+    $('.slidecontainer').append('<p class="slideheader.settingstext"> Высота плеера </p>');
+    $('.slidecontainer').append('<input type="range" min="60" class="slider" id="player-height_var" name="player-height_var">');
+    $('.slidecontainer').append('<p class="slidemin settingstext">0⠀⠀</p>');
+    $('.slidecontainer').append('<p class="slideval settingstext"> </p>');
+    $('.slideval').text((hght / 10 - 60) * 5);
+    $('.slidecontainer').append('<p class="slidemax settingstext"> 100 </p>');
+    $('.slider').attr('max', maxhght)
     $('.slider').attr('value', hght / 10);
 
-    /* Add animation */
+    $('#settings').append('<div class="switchcontainer"> </div>');
+    $('.switchcontainer').append('<p class="cintxt settingstext"> Режим кинотеатра </p>');
+    $('.switchcontainer').append(`
+        <label class="switch">
+            <input type="checkbox" id="switch" value="true">
+            <span class="slider-switch round"></span>
+        </label>
+    `);
+
+    /* Add panel animation */
     $('.player-height').attr('data-open-modal', '#player-settings-modal');
     $('.player-height').attr('data-media-up', 'md');
 
@@ -50,85 +71,39 @@ var hght = GM_getValue("hght");
         $('.plyr').css('height', 'inherit');
         $('.collapse__body').css('height', hght + 'px');
         $('.collapse__body').css('max-height', hght + 'px');
-    }
+
+        $('<div class="cinetint"> </div>').insertAfter($('#all_players'));
+        if (cinechck) {
+            $('.cinetint').toggleClass("is-active");
+            $('.player-frame').toggleClass("is-active");
+            $("#switch").prop("checked", true);
+        }
+    };
 
     /* Apply settings */
-    $('#player-height_var.slider').on('click', function () {
-        hght = $('#player-height_var.slider').val() * 10;
+    document.getElementById("player-height_var").oninput = function () {
+        hght = $('#player-height_var').val() * 10;
         $('.player-frame').css('height', hght + 'px');
         $('.player-frame').css('max-height', hght + 'px');
         $('.plyr').css('height', 'inherit');
         $('.collapse__body').css('height', hght + 'px');
         $('.collapse__body').css('max-height', hght + 'px');
+        $('.slideval').text((hght / 10 - 60) * 5);
         GM_setValue("hght", hght);
-    })
+    };
 
-    GM_addStyle(`
-    .slidecontainer
-    {
-        display: flex;
-        flex-wrap: wrap;
-        align-content: space-between;
-    }
-
-    .slideheader
-    {
-        font-size: 16px;
-        align-self: baseline;
-    }
-
-    .slidemin
-    {
-        font-size: 16px;
-    }
-
-    .slidemax
-    {
-        font-size: 16px;
-        margin-left: auto;
-    }
-
-    /* The slider itself */
-    .slider
-    {
-        -webkit-appearance: none;  /* Override default CSS styles */
-        appearance: none;
-        width: 100%; /* Full-width */
-        height: 10px; /* Specified height */
-        background: #1f2123; /* Grey background */
-        outline: none; /* Remove outline */
-        opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-        -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-        transition: opacity .2s;
-        margin-top: 20px;
-        margin-bottom: 20px;
-    }
-
-    /* Mouse-over effects */
-    .slider:hover
-    {
-        opacity: 1; /* Fully shown on mouse-over */
-    }
-
-    /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-
-    .slider::-webkit-slider-thumb
-    {
-        -webkit-appearance: none; /* Override default look */
-        appearance: none;
-        width: 25px; /* Set a specific slider handle width */
-        height: 25px; /* Slider handle height */
-        background: #572599; /* Green background */
-        cursor: pointer; /* Cursor on hover */
-    }
-
-    .slider::-moz-range-thumb
-    {
-        width: 25px; /* Set a specific slider handle width */
-        height: 25px; /* Slider handle height */
-        background: #572599; /* Green background */
-        cursor: pointer; /* Cursor on hover */
-    }
-    `)
+    /* Apply cinema mode */
+    $('#switch').on('click', function () {
+        if (!cinechck) {
+            $('.cinetint').toggleClass("is-active");
+            $('.player-frame').toggleClass("is-active");
+            cinechck = true;
+        }
+        else {
+            $('.cinetint').removeClass("is-active");
+            $('.player-frame').removeClass("is-active");
+            cinechck = false;
+        }
+    });
 }
 )();
