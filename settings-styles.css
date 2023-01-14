@@ -18,12 +18,17 @@
 }
 
 .slidemax {
-    margin-left: auto;
     color: #9a9a9a;
 }
 
 .slidemin {
     color: #9a9a9a;
+}
+
+.slideval {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 18px;
 }
 
 .slidecontainer {
