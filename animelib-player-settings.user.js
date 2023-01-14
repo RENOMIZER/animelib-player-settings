@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AnimeLib Player Settings
 // @namespace    mailto:implaninyl1977@rambler.ru
-// @version      1.0
+// @version      1.1
 // @description  Settings for video player
 // @author       RENOMIZER
 // @match        https://animelib.me/anime/*
