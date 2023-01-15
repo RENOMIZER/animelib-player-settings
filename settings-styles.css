@@ -198,5 +198,5 @@ input:checked+.slider-switch:before {
 }
 
 .scroller {
-    max-height: inherit;   
+    max-height: inherit !important;   
 }
